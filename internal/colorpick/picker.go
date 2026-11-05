@@ -6,9 +6,9 @@ import (
 	"math"
 	"strings"
 
-	"github.com/charmbracelet/bubbles/textinput"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/bubbles/v2/textinput"
+	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 
 	"github.com/giftpilz0/peripheralctl/internal/razer"
 	"github.com/giftpilz0/peripheralctl/internal/theme"
@@ -130,8 +130,15 @@ func (p *Picker) rows() int {
 	return pickerRows
 }
 
+// Paste inserts pasted text into the hex field while it is open.
+func (p *Picker) Paste(msg tea.PasteMsg) {
+	if p.hexMode {
+		p.input, _ = p.input.Update(msg)
+	}
+}
+
 // Update handles a key. changed reports a new colour, for live preview.
-func (p *Picker) Update(k tea.KeyMsg) (act Action, changed bool) {
+func (p *Picker) Update(k tea.KeyPressMsg) (act Action, changed bool) {
 	if p.hexMode {
 		switch k.String() {
 		case "esc":
@@ -155,7 +162,7 @@ func (p *Picker) Update(k tea.KeyMsg) (act Action, changed bool) {
 	switch key {
 	case "esc", "q":
 		return Cancel, false
-	case "enter", " ":
+	case "enter", "space":
 		return Confirm, false
 	case "#", "x":
 		p.hexMode = true

@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 
 	"github.com/giftpilz0/peripheralctl/internal/config"
 	"github.com/giftpilz0/peripheralctl/internal/via"
@@ -56,24 +56,24 @@ func (f *fakeBackend) Apply(want *via.State, saved *via.Color) (*via.State, via.
 	return f.state.Clone(), c, nil
 }
 
-func keyMsg(s string) tea.KeyMsg {
+func keyMsg(s string) tea.KeyPressMsg {
 	switch s {
 	case "up":
-		return tea.KeyMsg{Type: tea.KeyUp}
+		return tea.KeyPressMsg{Code: tea.KeyUp}
 	case "down":
-		return tea.KeyMsg{Type: tea.KeyDown}
+		return tea.KeyPressMsg{Code: tea.KeyDown}
 	case "left":
-		return tea.KeyMsg{Type: tea.KeyLeft}
+		return tea.KeyPressMsg{Code: tea.KeyLeft}
 	case "right":
-		return tea.KeyMsg{Type: tea.KeyRight}
+		return tea.KeyPressMsg{Code: tea.KeyRight}
 	case "enter":
-		return tea.KeyMsg{Type: tea.KeyEnter}
+		return tea.KeyPressMsg{Code: tea.KeyEnter}
 	case "esc":
-		return tea.KeyMsg{Type: tea.KeyEsc}
+		return tea.KeyPressMsg{Code: tea.KeyEsc}
 	case "tab":
-		return tea.KeyMsg{Type: tea.KeyTab}
+		return tea.KeyPressMsg{Code: tea.KeyTab}
 	}
-	return tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune(s)}
+	return tea.KeyPressMsg{Code: []rune(s)[0], Text: s}
 }
 
 // press sends keys and runs what they start, as the Bubble Tea loop would.
@@ -580,7 +580,7 @@ func readOnlyModel(t *testing.T) (*model, *fakeBackend) {
 
 func TestReadOnlyKeyboardCannotBeEdited(t *testing.T) {
 	m, f := readOnlyModel(t)
-	if !strings.Contains(m.View(), "write whitelist") {
+	if !strings.Contains(m.render(), "write whitelist") {
 		t.Fatal("no warning on screen")
 	}
 	press(m, "enter")
@@ -620,7 +620,7 @@ func TestKeyboardWithoutDefinitionIsExplained(t *testing.T) {
 	if !strings.Contains(m.status(), "1234:0001") || !strings.Contains(m.status(), "import") {
 		t.Fatalf("status %q", m.status())
 	}
-	m.View()
+	m.render()
 	press(m, "enter", "t", "2", "right")
 }
 

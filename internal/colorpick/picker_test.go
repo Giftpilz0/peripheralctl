@@ -3,7 +3,7 @@ package colorpick
 import (
 	"testing"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/giftpilz0/peripheralctl/internal/razer"
 )
@@ -36,17 +36,31 @@ func TestPickerKeys(t *testing.T) {
 	if p.row != rowPalette1 || p.pal != 5 {
 		t.Fatalf("start at row %d pal %d", p.row, p.pal)
 	}
-	if _, changed := p.Update(tea.KeyMsg{Type: tea.KeyRight}); !changed || p.Col != palette[0][6] {
+	if _, changed := p.Update(tea.KeyPressMsg{Code: tea.KeyRight}); !changed || p.Col != palette[0][6] {
 		t.Fatalf("right: %s changed=%v", p.Col, changed)
 	}
-	p.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'#'}})
+	p.Update(tea.KeyPressMsg{Code: '#', Text: "#"})
 	p.input.SetValue("123456")
-	p.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	p.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
 	if p.Col != (razer.RGB{R: 0x12, G: 0x34, B: 0x56}) || p.hexMode {
 		t.Fatalf("hex entry: %s hexMode=%v", p.Col, p.hexMode)
 	}
-	if act, _ := p.Update(tea.KeyMsg{Type: tea.KeyEnter}); act != Confirm {
+	if act, _ := p.Update(tea.KeyPressMsg{Code: tea.KeyEnter}); act != Confirm {
 		t.Fatal("enter should confirm")
+	}
+}
+
+func TestPickerPasteAndSpace(t *testing.T) {
+	p := New("Colour", razer.RGB{G: 255})
+	p.Update(tea.KeyPressMsg{Code: '#', Text: "#"})
+	p.input.SetValue("")
+	p.Paste(tea.PasteMsg{Content: "abcdef"})
+	p.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
+	if p.Col != (razer.RGB{R: 0xab, G: 0xcd, B: 0xef}) {
+		t.Fatalf("pasted hex: %s", p.Col)
+	}
+	if act, _ := p.Update(tea.KeyPressMsg{Code: tea.KeySpace, Text: " "}); act != Confirm {
+		t.Fatal("space should confirm")
 	}
 }
 
@@ -63,7 +77,7 @@ func TestHueSatPickerKeepsExactValues(t *testing.T) {
 func TestHueSatPickerHasNoValueRow(t *testing.T) {
 	p := NewHueSat("Colour", 123, 0.5)
 	p.row = rowSat
-	p.Update(tea.KeyMsg{Type: tea.KeyDown})
+	p.Update(tea.KeyPressMsg{Code: tea.KeyDown})
 	if p.row != rowPalette1 {
 		t.Fatalf("down from saturation went to row %d", p.row)
 	}

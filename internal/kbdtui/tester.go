@@ -10,7 +10,7 @@ import (
 	"strings"
 	"unsafe"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 	"golang.org/x/sys/unix"
 
 	"github.com/giftpilz0/peripheralctl/internal/theme"

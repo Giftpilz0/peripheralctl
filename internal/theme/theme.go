@@ -1,13 +1,16 @@
 // Package theme holds the colours and styles shared by the screens.
 package theme
 
-import "github.com/charmbracelet/lipgloss"
+import (
+	"charm.land/lipgloss/v2"
+	"charm.land/lipgloss/v2/compat"
+)
 
 var (
-	AccentColor = lipgloss.AdaptiveColor{Light: "#1a7f37", Dark: "#44d17a"}
-	DimColor    = lipgloss.AdaptiveColor{Light: "#6e7781", Dark: "#8b949e"}
-	WarnColor   = lipgloss.AdaptiveColor{Light: "#bc4c00", Dark: "#f0883e"}
-	BadColor    = lipgloss.AdaptiveColor{Light: "#cf222e", Dark: "#ff7b72"}
+	AccentColor = compat.AdaptiveColor{Light: lipgloss.Color("#1a7f37"), Dark: lipgloss.Color("#44d17a")}
+	DimColor    = compat.AdaptiveColor{Light: lipgloss.Color("#6e7781"), Dark: lipgloss.Color("#8b949e")}
+	WarnColor   = compat.AdaptiveColor{Light: lipgloss.Color("#bc4c00"), Dark: lipgloss.Color("#f0883e")}
+	BadColor    = compat.AdaptiveColor{Light: lipgloss.Color("#cf222e"), Dark: lipgloss.Color("#ff7b72")}
 
 	Title = lipgloss.NewStyle().Bold(true).Foreground(AccentColor)
 	Dim   = lipgloss.NewStyle().Foreground(DimColor)

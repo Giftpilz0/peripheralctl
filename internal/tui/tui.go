@@ -10,10 +10,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/charmbracelet/bubbles/spinner"
-	"github.com/charmbracelet/bubbles/textinput"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/bubbles/v2/spinner"
+	"charm.land/bubbles/v2/textinput"
+	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 
 	"github.com/giftpilz0/peripheralctl/internal/colorpick"
 	"github.com/giftpilz0/peripheralctl/internal/config"
@@ -446,7 +446,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 		return m, m.refresh()
-	case tea.KeyMsg:
+	case tea.KeyPressMsg:
 		if m.picker != nil {
 			return m, m.updatePicker(msg)
 		}
@@ -454,6 +454,14 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, m.updateEditing(msg)
 		}
 		return m, m.updateKeys(msg)
+	case tea.PasteMsg:
+		if m.picker != nil {
+			m.picker.Paste(msg)
+		} else if m.editing {
+			var cmd tea.Cmd
+			m.input, cmd = m.input.Update(msg)
+			return m, cmd
+		}
 	}
 	return m, nil
 }
@@ -496,7 +504,7 @@ func (m *model) visibleFields() []*field {
 	return out
 }
 
-func (m *model) updateKeys(k tea.KeyMsg) tea.Cmd {
+func (m *model) updateKeys(k tea.KeyPressMsg) tea.Cmd {
 	fs := m.visibleFields()
 	m.cursor = max(0, min(m.cursor, len(fs)-1))
 	var f *field
@@ -530,7 +538,7 @@ func (m *model) updateKeys(k tea.KeyMsg) tea.Cmd {
 				m.activeStage.val = min(m.activeStage.val, m.stageCount.val)
 			}
 		}
-	case "enter", " ":
+	case "enter", "space":
 		if f == nil {
 			break
 		}
@@ -579,7 +587,7 @@ func (m *model) startEdit(v string) {
 	m.input.Focus()
 }
 
-func (m *model) updateEditing(k tea.KeyMsg) tea.Cmd {
+func (m *model) updateEditing(k tea.KeyPressMsg) tea.Cmd {
 	f := m.visibleFields()[m.cursor]
 	switch k.String() {
 	case "esc":
@@ -780,7 +788,10 @@ func swatch(c razer.RGB) string {
 	return lipgloss.NewStyle().Background(lipgloss.Color(c.String())).Render("    ")
 }
 
-func (m *model) View() string {
+// View implements tea.Model.
+func (m *model) View() tea.View { return tea.NewView(m.render()) }
+
+func (m *model) render() string {
 	var b strings.Builder
 	b.WriteString(m.title() + "\n")
 	b.WriteString(m.statusLine() + "\n")

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/giftpilz0/peripheralctl/internal/kbdtui"
 	"github.com/giftpilz0/peripheralctl/internal/razer"
@@ -78,7 +78,7 @@ func newModel(mouse mouseScreen, kbd keyboardScreen, seen detectMsg) *model {
 // Run starts the UI.
 func Run() error {
 	m := newModel(tui.New(requestQuit), kbdtui.New(requestQuit), detect())
-	_, err := tea.NewProgram(m, tea.WithAltScreen()).Run()
+	_, err := tea.NewProgram(m).Run()
 	return err
 }
 
@@ -99,7 +99,7 @@ func (m *model) active() screen {
 // each screen only reacts to its own messages.
 func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyMsg:
+	case tea.KeyPressMsg:
 		switch msg.String() {
 		case "ctrl+c":
 			return m, m.close()
@@ -112,6 +112,9 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return m, nil
 		}
+		_, cmd := m.active().Update(msg)
+		return m, cmd
+	case tea.PasteMsg:
 		_, cmd := m.active().Update(msg)
 		return m, cmd
 	case quitMsg:
@@ -175,4 +178,8 @@ func (m *model) header() string {
 }
 
 // View implements tea.Model.
-func (m *model) View() string { return m.header() + "\n\n" + m.active().View() }
+func (m *model) View() tea.View {
+	v := tea.NewView(m.header() + "\n\n" + m.active().View().Content)
+	v.AltScreen = true
+	return v
+}

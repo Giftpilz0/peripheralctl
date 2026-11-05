@@ -5,8 +5,8 @@ import (
 	"math"
 	"time"
 
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 
 	"github.com/giftpilz0/peripheralctl/internal/colorpick"
 	"github.com/giftpilz0/peripheralctl/internal/razer"
@@ -41,7 +41,7 @@ func colorSwatch(c via.Color) string {
 	return lipgloss.NewStyle().Background(lipgloss.Color(colorRGB(c).String())).Render("    ")
 }
 
-func (m *model) updateColor(msg tea.KeyMsg) tea.Cmd {
+func (m *model) updateColor(msg tea.KeyPressMsg) tea.Cmd {
 	act, changed := m.color.Update(msg)
 	switch act {
 	case colorpick.Confirm:

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/giftpilz0/peripheralctl/internal/razer"
 )
@@ -31,7 +31,7 @@ func modelNamed(t *testing.T, name string) razer.Model {
 
 func TestReadOnlyMouseRefusesApplyAndPreview(t *testing.T) {
 	m := withMouse(t, modelNamed(t, "Viper"))
-	if !strings.Contains(m.View(), "write whitelist") {
+	if !strings.Contains(m.render(), "write whitelist") {
 		t.Fatal("no warning on screen")
 	}
 	for tab := range m.tabs {
@@ -46,7 +46,7 @@ func TestReadOnlyMouseRefusesApplyAndPreview(t *testing.T) {
 	m.cur, m.cursor = 0, 0
 	m.logo.effect.setChoice(string(razer.EffectStatic))
 	m.cursor = 1
-	m.updateKeys(tea.KeyMsg{Type: tea.KeyEnter})
+	m.updateKeys(tea.KeyPressMsg{Code: tea.KeyEnter})
 	if m.picker != nil {
 		t.Fatal("the live colour picker opened")
 	}
@@ -75,7 +75,7 @@ func TestUnknownRazerDeviceIsReported(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	m := newModel()
 	m.found.Unknown = []uint16{0x00ff}
-	if !strings.Contains(m.View(), "1532:00ff") {
+	if !strings.Contains(m.render(), "1532:00ff") {
 		t.Fatal("no warning on screen")
 	}
 }

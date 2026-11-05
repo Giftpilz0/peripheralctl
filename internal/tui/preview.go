@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/giftpilz0/peripheralctl/internal/colorpick"
 	"github.com/giftpilz0/peripheralctl/internal/daemon"
@@ -142,7 +142,7 @@ func (m *model) updatePreview(msg tea.Msg) tea.Cmd {
 	return nil
 }
 
-func (m *model) updatePicker(k tea.KeyMsg) tea.Cmd {
+func (m *model) updatePicker(k tea.KeyPressMsg) tea.Cmd {
 	act, changed := m.picker.Update(k)
 	switch act {
 	case colorpick.Confirm:

@@ -13,10 +13,10 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/charmbracelet/bubbles/spinner"
-	"github.com/charmbracelet/bubbles/textinput"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/bubbles/v2/spinner"
+	"charm.land/bubbles/v2/textinput"
+	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 
 	"github.com/giftpilz0/peripheralctl/internal/colorpick"
 	"github.com/giftpilz0/peripheralctl/internal/theme"
@@ -303,10 +303,30 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, m.previewDone(msg)
 	case testerMsg:
 		return m, m.handleTester(msg)
-	case tea.KeyMsg:
+	case tea.KeyPressMsg:
 		return m, m.handleKey(msg)
+	case tea.PasteMsg:
+		return m, m.handlePaste(msg)
 	}
 	return m, nil
+}
+
+// handlePaste sends pasted text to the open text field, if any.
+func (m *model) handlePaste(msg tea.PasteMsg) tea.Cmd {
+	switch {
+	case m.busy != "" || m.confirm != "" || m.tester != nil:
+	case m.color != nil:
+		m.color.Paste(msg)
+	case m.picker != nil:
+		m.picker.input, _ = m.picker.input.Update(msg)
+		m.picker.problem = ""
+		m.picker.filter()
+	case m.naming:
+		var cmd tea.Cmd
+		m.nameInput, cmd = m.nameInput.Update(msg)
+		return cmd
+	}
+	return nil
 }
 
 func (m *model) handleState(msg stateMsg) tea.Cmd {
@@ -350,7 +370,7 @@ func (m *model) dropAppliedEdits() {
 	}
 }
 
-func (m *model) handleKey(msg tea.KeyMsg) tea.Cmd {
+func (m *model) handleKey(msg tea.KeyPressMsg) tea.Cmd {
 	switch {
 	case m.busy != "":
 		return nil
@@ -480,7 +500,7 @@ func (m *model) shiftLayer(dir int) {
 	m.layer = (m.layer + dir + m.state.Layers) % m.state.Layers
 }
 
-func (m *model) updateNaming(msg tea.KeyMsg) tea.Cmd {
+func (m *model) updateNaming(msg tea.KeyPressMsg) tea.Cmd {
 	switch msg.String() {
 	case "esc":
 		m.naming = false
@@ -798,7 +818,9 @@ func (m *model) help() string {
 }
 
 // View implements tea.Model.
-func (m *model) View() string {
+func (m *model) View() tea.View { return tea.NewView(m.render()) }
+
+func (m *model) render() string {
 	if m.width > 0 && float64(m.width) < m.def.Width()*4 {
 		return theme.Warn.Render(fmt.Sprintf("terminal too narrow: need %d columns", int(math.Ceil(m.def.Width()*4))))
 	}

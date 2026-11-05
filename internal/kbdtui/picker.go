@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/charmbracelet/bubbles/textinput"
-	tea "github.com/charmbracelet/bubbletea"
+	"charm.land/bubbles/v2/textinput"
+	tea "charm.land/bubbletea/v2"
 
 	"github.com/giftpilz0/peripheralctl/internal/theme"
 	"github.com/giftpilz0/peripheralctl/internal/via"
@@ -78,7 +78,7 @@ func parseCode(s string) (uint16, bool) {
 	return uint16(v), err == nil
 }
 
-func (m *model) updatePicker(msg tea.KeyMsg) {
+func (m *model) updatePicker(msg tea.KeyPressMsg) {
 	p := m.picker
 	switch msg.String() {
 	case "esc":
